@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CreateProfileActivity"
+    android:background="#DEDEDE">
+
+
+    <!-- Card Container with All Content Inside -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profileCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:layout_marginBottom="24dp"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="28dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="28dp">
+
+            <!-- Title Inside Card -->
+            <TextView
+                android:id="@+id/titleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/create_your_profileP"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#212121"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/subtitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/let_us_get_to_know_youP"
+                android:textSize="15sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Name Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/nameInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/full_nameP"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxStrokeColor="#6200EE"
+                app:hintAnimationEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/profile_EDIT_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:textColor="#000000"
+                    android:textSize="16sp"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+            <!-- Age Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ageInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/ageP"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxStrokeColor="#6200EE"
+                app:hintAnimationEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/profile_EDIT_age"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:textColor="#000000"
+                    android:textSize="16sp"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
+
+            <!-- Submit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/profile_BTN_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/SaveP"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:elevation="6dp"
+                app:cornerRadius="24dp"
+                app:backgroundTint="#6200EE" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

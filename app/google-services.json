@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "369682148401",
+    "project_id": "fatless-android",
+    "storage_bucket": "fatless-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369682148401:android:eccde277cd7d929cb33910",
+        "android_client_info": {
+          "package_name": "com.example.fatless"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369682148401-eigprgsbg0p1dd9lrnhumvn9fb7b17u5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fatless",
+            "certificate_hash": "1582fed3c488ac6a3d85ea539ddcd63cac7c3657"
+          }
+        },
+        {
+          "client_id": "369682148401-0d873l9k356mqj5g43ihj89h61qpq11k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuJq-anUQdYDPEqm3fJjDSOvEVtB6vxq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369682148401-0d873l9k356mqj5g43ihj89h61qpq11k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
