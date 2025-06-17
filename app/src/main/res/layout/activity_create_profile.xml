@@ -106,7 +106,18 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="24dp" />
-
+            <TextView
+                android:id="@+id/profile_LBL_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/error_profile_save"
+                android:visibility="invisible"
+                android:textSize="18sp"
+                android:textColor="@color/red"
+                android:gravity="center"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
             <!-- Submit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/profile_BTN_save"

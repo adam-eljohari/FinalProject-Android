@@ -8,8 +8,9 @@
     <string name="title_leaderBoard">Leader Board</string>
     <string name="title_profile">Profile</string>
     <string name="SaveP">Save</string>
-    <string name="ageP">Age</string>
+    <string name="ageP">Age (10–99)</string>
     <string name="full_nameP">Full Name</string>
     <string name="let_us_get_to_know_youP">Let us get to know you</string>
     <string name="create_your_profileP">Create Your Profile</string>
+    <string name="error_profile_save">Error the name or the age invalid option</string>
 </resources>
