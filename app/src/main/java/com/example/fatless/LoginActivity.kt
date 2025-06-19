@@ -1,5 +1,6 @@
 package com.example.fatless
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -68,11 +69,13 @@ class LoginActivity : AppCompatActivity() {
     private fun checkProfileCreated(){
 
     }
+    @SuppressLint("UnsafeIntentLaunch")
     private fun transactToMain() {
         intent = Intent(this,MainActivity::class.java)
         startActivity(intent)
         finish()
     }
+    @SuppressLint("UnsafeIntentLaunch")
     private fun transactToNextScreen() {
         intent = Intent(this,CreateProfileActivity::class.java)
         startActivity(intent)
