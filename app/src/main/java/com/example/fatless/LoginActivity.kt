@@ -65,6 +65,9 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkProfileCreated(){
+
+    }
     private fun transactToMain() {
         intent = Intent(this,MainActivity::class.java)
         startActivity(intent)
