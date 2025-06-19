@@ -6,19 +6,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.fatless.LoginActivity
-import com.example.fatless.dataModels.Profile
 import com.example.fatless.databinding.FragmentProfileBinding
 import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
 
-    private var currentProfile: Profile? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -53,31 +54,55 @@ class ProfileFragment : Fragment() {
 
     private fun checkSaveProfile() {
 
-        val name = binding.profileEDITName.text.toString()
+        val name = binding.profileEDITName.text.toString().trim()
         val age = binding.profileEDITAge.text.toString().toIntOrNull() ?: 0
 
-        val saveUpdatedProfileData = mutableMapOf<String, Any>()
 
-        currentProfile?.let { profile ->
-            if (profile.name != name) {
-                saveUpdatedProfileData["name"] = name
-            }
-            if (profile.age != age){
-                saveUpdatedProfileData["age"] = age
-            }
+
+        if (name.isBlank() || age < 10 || age > 99 ) {
+            binding.profileLBLError.visibility = View.VISIBLE
+            Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        if (saveUpdatedProfileData.isNotEmpty()){
-
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            return
         }
 
+        val updatedData = mapOf("name" to name, "age" to age)
+
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
+
+        userRef.updateChildren(updatedData)
+            .addOnSuccessListener {
+                binding.profileLBLError.visibility = View.INVISIBLE
+                Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Update failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         editProfile(false)
     }
 
     private fun currentUserProfile() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("users").child(uid!!)
 
+        userRef.get().addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                val name = snapshot.child("name").value.toString()
+                val age = snapshot.child("age").value.toString()
 
+                binding.profileEDITName.setText(name)
+                binding.profileEDITAge.setText(age)
 
+            }
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
+        }
         editProfile(false)
     }
 

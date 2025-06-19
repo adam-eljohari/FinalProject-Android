@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "369682148401",
+    "firebase_url": "https://fatless-android-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "fatless-android",
     "storage_bucket": "fatless-android.firebasestorage.app"
   },

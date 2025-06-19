@@ -62,5 +62,9 @@ dependencies {
     implementation(libs.firebase.ui.auth)
 
 
+    //Realtime DB:
+    implementation(libs.firebase.database)
+
+
 
 }

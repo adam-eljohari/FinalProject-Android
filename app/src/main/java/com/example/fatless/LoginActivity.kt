@@ -12,6 +12,7 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
             signIn()
         }
         else{
-            transactToMain()
+            checkProfileCreated()
         }
     }
 
@@ -54,11 +55,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
+
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            transactToNextScreen()
+
+            checkProfileCreated()
 
         } else {
             Toast.makeText(this,"Error: Failed logging in.",Toast.LENGTH_LONG).show()
@@ -67,6 +68,19 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkProfileCreated(){
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid!!)
+
+        userRef.get().addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
+                transactToMain()
+            } else {
+                Toast.makeText(this, "Welcome! Please set up your profile.", Toast.LENGTH_SHORT).show()
+                transactToNextScreen()
+            }
+        }
 
     }
     @SuppressLint("UnsafeIntentLaunch")

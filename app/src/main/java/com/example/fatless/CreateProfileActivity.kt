@@ -9,8 +9,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.fatless.utilities.constants
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+
 
 class CreateProfileActivity : AppCompatActivity() {
 
@@ -28,26 +32,66 @@ class CreateProfileActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        checkProfileCreated()
         findView()
         crprofile_BTN_save.setOnClickListener{
             saveProfileData()
         }
     }
 
+    private fun checkProfileCreated(){
+
+        val user = FirebaseAuth.getInstance().currentUser
+        val uid = user?.uid
+
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("users")
+
+        if (uid != null) {
+            val profComp = userRef.child(uid).database.getReference(constants.DB.profileCompleteRef)
+
+            if (profComp.equals(true)) {
+                transactToMain()
+            }
+        }
+
+    }
+
     private fun saveProfileData() {
         val name = crprofile_EDIT_name.text.toString()
         val age = crprofile_EDIT_age.text.toString().toIntOrNull() ?: 0
 
-        if (age <= 9 || name.isBlank()){
+
+
+        if (age < 10 || name.isBlank() || age > 99){
             crprofile_LBL_error.visibility = View.VISIBLE
             Toast.makeText(this, "Failed to save profile", Toast.LENGTH_SHORT).show()
             return
         }
-        else{
 //            save profile data to data base in firebase
+        val user = FirebaseAuth.getInstance().currentUser
+        val uid = user?.uid
 
+        val database = FirebaseDatabase.getInstance()
+        val userRef = database.getReference("users")
 
-            transactToMain()
+        val userData = mapOf(
+            "name" to name,
+            "age" to age,
+            "profile_complete" to true,
+            "calories_burned" to 0,
+            "favorite_workouts" to emptyList<String>()
+        )
+
+        if (uid != null) {
+            userRef.child(uid).setValue(userData)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "User profile saved!", Toast.LENGTH_SHORT).show()
+                    transactToMain()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Failed to save", Toast.LENGTH_SHORT).show()
+                }
         }
 
     }
@@ -64,6 +108,9 @@ class CreateProfileActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+
+
 
 
 
