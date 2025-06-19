@@ -14,10 +14,10 @@ import com.google.android.material.textfield.TextInputEditText
 
 class CreateProfileActivity : AppCompatActivity() {
 
-    private lateinit var profile_LBL_error : TextView
-    private lateinit var profile_EDIT_name : TextInputEditText
-    private lateinit var profile_EDIT_age : TextInputEditText
-    private lateinit var profile_BTN_save : MaterialButton
+    private lateinit var crprofile_LBL_error : TextView
+    private lateinit var crprofile_EDIT_name : TextInputEditText
+    private lateinit var crprofile_EDIT_age : TextInputEditText
+    private lateinit var crprofile_BTN_save : MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,17 +29,17 @@ class CreateProfileActivity : AppCompatActivity() {
             insets
         }
         findView()
-        profile_BTN_save.setOnClickListener{
+        crprofile_BTN_save.setOnClickListener{
             saveProfileData()
         }
     }
 
     private fun saveProfileData() {
-        val name = profile_EDIT_name.text.toString()
-        val age = profile_EDIT_age.text.toString().toIntOrNull() ?: 0
+        val name = crprofile_EDIT_name.text.toString()
+        val age = crprofile_EDIT_age.text.toString().toIntOrNull() ?: 0
 
         if (age <= 9 || name.isBlank()){
-            profile_LBL_error.visibility = View.VISIBLE
+            crprofile_LBL_error.visibility = View.VISIBLE
             Toast.makeText(this, "Failed to save profile", Toast.LENGTH_SHORT).show()
             return
         }
@@ -53,10 +53,10 @@ class CreateProfileActivity : AppCompatActivity() {
     }
 
     private fun findView() {
-        profile_LBL_error = findViewById(R.id.profile_LBL_error)
-        profile_EDIT_name = findViewById(R.id.profile_EDIT_name)
-        profile_EDIT_age = findViewById(R.id.profile_EDIT_age)
-        profile_BTN_save = findViewById(R.id.profile_BTN_save)
+        crprofile_LBL_error = findViewById(R.id.crprofile_LBL_error)
+        crprofile_EDIT_name = findViewById(R.id.crprofile_EDIT_name)
+        crprofile_EDIT_age = findViewById(R.id.crprofile_EDIT_age)
+        crprofile_BTN_save = findViewById(R.id.crprofile_BTN_save)
     }
 
     private fun transactToMain() {

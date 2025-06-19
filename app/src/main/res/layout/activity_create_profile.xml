@@ -66,7 +66,7 @@
                 app:hintAnimationEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/profile_EDIT_name"
+                    android:id="@+id/crprofile_EDIT_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
@@ -94,7 +94,7 @@
                 app:hintAnimationEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/profile_EDIT_age"
+                    android:id="@+id/crprofile_EDIT_age"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="24dp" />
             <TextView
-                android:id="@+id/profile_LBL_error"
+                android:id="@+id/crprofile_LBL_error"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/error_profile_save"
@@ -120,7 +120,7 @@
                 android:layout_height="24dp" />
             <!-- Submit Button -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/profile_BTN_save"
+                android:id="@+id/crprofile_BTN_save"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/SaveP"

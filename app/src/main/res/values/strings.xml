@@ -11,6 +11,12 @@
     <string name="ageP">Age (10–99)</string>
     <string name="full_nameP">Full Name</string>
     <string name="let_us_get_to_know_youP">Let us get to know you</string>
-    <string name="create_your_profileP">Create Your Profile</string>
+    <string name="create_your_profileP">👤 Create Your Profile</string>
     <string name="error_profile_save">Error the name or the age invalid option</string>
+    <string name="user_profile">👤 User Profile</string>
+    <string name="name">Name</string>
+    <string name="age">Age</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="sign_out">Sign Out</string>
 </resources>
