@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/top_10_calories_burned"
-                android:textSize="20sp"
+                android:textSize="26sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
                 android:layout_gravity="center_horizontal"
