@@ -43,7 +43,7 @@ class LeaderboardFragment: Fragment() {
     }
 
     private fun loadLeaderboardFromRealtimeDB() {
-        val databaseRef = FirebaseDatabase.getInstance().getReference("users")
+        val databaseRef = FirebaseDatabase.getInstance().getReference(constants.DB.usersRef)
         val todayDate = getTodayDate()
 
         databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {

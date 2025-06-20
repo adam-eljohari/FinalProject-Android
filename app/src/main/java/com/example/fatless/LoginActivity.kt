@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.fatless.utilities.constants
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -70,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
     private fun checkProfileCreated(){
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid!!)
+        val userRef = FirebaseDatabase.getInstance().getReference(constants.DB.usersRef).child(uid!!)
 
         userRef.get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {

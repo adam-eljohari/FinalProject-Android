@@ -31,7 +31,6 @@ class HomeAdapter (
         val sport = sportList[position]
         val b = holder.binding
 
-
         // Set texts
         b.sportLBLSportName.text = sport.name
         b.sportLBLTime.text = sport.duration.toString()
@@ -42,36 +41,23 @@ class HomeAdapter (
         // Set image
         b.imgSport.setImageResource(sport.imageResId)
 
-        // Set favorite icon
-        b.sportBTNFavorite.setImageResource(
-            if (sport.isFavorite) R.drawable.favorite_bnt_pic
-            else R.drawable.unfavorite_bnt_pic
-        )
 
-        // Set "in progress" visual (optional effect)
-        if (sport.isInCurrent) {
-            b.cardSport.setCardBackgroundColor(
-                ContextCompat.getColor(b.root.context, R.color.progress_yellow)
-            )
+        // Favorite button
+        val favIcon = if (sport.isFavorite) R.drawable.favorite_bnt_pic else R.drawable.unfavorite_bnt_pic
+        b.sportBTNFavorite.setImageResource(favIcon)
 
-        } else {
-            b.cardSport.setCardBackgroundColor(
-                ContextCompat.getColor(b.root.context, R.color.white)
-            )
-            b.sportBTNPlay.setImageResource(R.drawable.play_arrow)
+        b.sportBTNFavorite.setOnClickListener {
+            onFavoriteClick(sport)
         }
 
-        // Click: Play
+        // Background color for current sport
+        val cardColor = if (sport.isInCurrent) R.color.progress_yellow else R.color.white
+        b.cardSport.setCardBackgroundColor(ContextCompat.getColor(b.root.context, cardColor))
+
         b.sportBTNPlay.setOnClickListener {
             onPlayClick(sport)
         }
 
-        // Click: Favorite
-        b.sportBTNFavorite.setOnClickListener {
-            sport.isFavorite = !sport.isFavorite
-            notifyItemChanged(position)
-            onFavoriteClick(sport)
-        }
     }
 
     override fun getItemCount(): Int = sportList.size

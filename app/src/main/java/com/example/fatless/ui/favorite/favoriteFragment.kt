@@ -4,20 +4,154 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fatless.R
+import com.example.fatless.adapter.HomeAdapter
+import com.example.fatless.data.Sport
 import com.example.fatless.databinding.FragmentFavoriteBinding
+import com.example.fatless.utilities.constants
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.ValueEventListener
 
 class favoriteFragment : Fragment() {
 
     private var _binding: FragmentFavoriteBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var homeAdapter: HomeAdapter
+    private var favoriteSports = listOf<Sport>()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
 
-
         return binding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+        loadFavoriteSports()
+    }
+
+
+    private fun setupRecyclerView() {
+        homeAdapter = HomeAdapter(
+            sportList = favoriteSports,
+            onPlayClick = { sport ->
+                setCurrentSport(sport.name)
+            },
+            onFavoriteClick = { sport ->
+                sport.isFavorite = !sport.isFavorite
+                updateFavoriteInFirebase(sport)
+            }
+        )
+
+        binding.recyclerViewFavorites.adapter = homeAdapter
+        binding.recyclerViewFavorites.layoutManager = LinearLayoutManager(requireContext())
+    }
+
+
+    private fun loadFavoriteSports() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val favoriteNames = snapshot.child(constants.DB.favoriteSportsRef)
+                    .getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+
+                val currentSport = snapshot.child(constants.DB.currentSportRef)
+                    .getValue(String::class.java)
+
+                val allSports = getLocalSports()
+
+                favoriteSports = allSports.filter { it.name in favoriteNames }.map { sport ->
+                    sport.copy(
+                        isFavorite = true,
+                        isInCurrent = currentSport != null && sport.name == currentSport
+                    )
+                }
+
+                homeAdapter.updateList(favoriteSports)
+
+                binding.favoriteLBLTitleEmptyFavorites.visibility =
+                    if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(requireContext(), "Failed to load favorites", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun updateFavoriteInFirebase(sport: Sport) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val favRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+            .child(constants.DB.favoriteSportsRef)
+
+        favRef.get().addOnSuccessListener { snapshot ->
+            val currentFavorites = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+
+            val updatedFavorites = currentFavorites - sport.name
+
+            favRef.setValue(updatedFavorites).addOnSuccessListener {
+                // 🧠 Remove from list and update UI
+                favoriteSports = favoriteSports.filter { it.name != sport.name }
+                homeAdapter.updateList(favoriteSports)
+
+                // Show empty state if needed
+                binding.favoriteLBLTitleEmptyFavorites.visibility =
+                    if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }
+    }
+
+    private fun setCurrentSport(sportName: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+
+        userRef.child(constants.DB.currentSportRef).setValue(sportName)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT).show()
+                loadFavoriteSports()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to set current sport", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun getLocalSports(): List<Sport> {
+        return listOf(
+            Sport("Jumping Jacks", 30, 200, R.drawable.jump_jacks),
+            Sport("Push Ups", 20, 150, R.drawable.push_ups),
+            Sport("Plank", 10, 90, R.drawable.plank),
+            Sport("Squats", 25, 180, R.drawable.squats),
+            Sport("Lunges", 20, 160, R.drawable.lunges),
+            Sport("Mountain Climbers", 15, 190, R.drawable.mountain_climbers),
+            Sport("Burpees", 20, 220, R.drawable.burpees),
+            Sport("Yoga", 40, 140, R.drawable.yoga),
+            Sport("Shadow Boxing", 25, 210, R.drawable.shadow_boxing),
+            Sport("Skipping Rope", 30, 300, R.drawable.skipping_rope),
+            Sport("Wall Sit", 10, 80, R.drawable.wall_sit),
+            Sport("Sit Ups", 20, 130, R.drawable.sit_ups),
+            Sport("Running", 20, 200, R.drawable.running)
+        )
+    }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

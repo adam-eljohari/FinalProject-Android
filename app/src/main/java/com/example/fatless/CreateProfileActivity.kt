@@ -48,7 +48,7 @@ class CreateProfileActivity : AppCompatActivity() {
         val uid = user?.uid
 
         val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("users")
+        val userRef = database.getReference(constants.DB.usersRef)
 
         if (uid != null) {
             val profComp = userRef.child(uid).database.getReference(constants.DB.profileCompleteRef)
@@ -76,7 +76,7 @@ class CreateProfileActivity : AppCompatActivity() {
         val uid = user?.uid
 
         val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("users")
+        val userRef = database.getReference(constants.DB.usersRef)
 
         val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val dailyCaloriesMap = mapOf(todayDate to 0)
@@ -86,7 +86,7 @@ class CreateProfileActivity : AppCompatActivity() {
             constants.DB.ageRef to age,
             constants.DB.profileCompleteRef to true,
             constants.DB.caloriesPerDayRef to dailyCaloriesMap,
-            constants.DB.favoriteWorkoutsRef to emptyList<String>()
+            constants.DB.favoriteSportsRef to emptyList<String>()
         )
 
         if (uid != null) {

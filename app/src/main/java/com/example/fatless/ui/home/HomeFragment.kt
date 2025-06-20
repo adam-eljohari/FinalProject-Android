@@ -14,8 +14,11 @@ import com.example.fatless.data.Sport
 import com.example.fatless.databinding.FragmentHomeBinding
 import com.example.fatless.utilities.constants
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,6 +29,7 @@ private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var homeAdapter: HomeAdapter
+    private var sportList = listOf<Sport>()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -37,38 +41,133 @@ private var _binding: FragmentHomeBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadUserName()
+        setupRecyclerView()
+        loadUserData()
         binding.homeBTNCalculateBMI.setOnClickListener {
             calculateAndShowBMI()
         }
-        setupRecyclerView()
     }
 
-    private fun loadUserName() {
 
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("users").child(uid!!)
-        val todayDate = getTodayDate()
-
-        userRef.get().addOnSuccessListener { snapshot ->
-            if (snapshot.exists()) {
-                val name = snapshot.child(constants.DB.nameRef).value.toString()
-                val caloriesPerDay = snapshot.child(constants.DB.caloriesPerDayRef).child(todayDate).getValue(Int::class.java) ?: 0
-
-                binding.homeETUserName.text = name
-
-                binding.homeLBLCaloriesValue.text = caloriesPerDay.toString()
+    private fun setupRecyclerView() {
+        homeAdapter = HomeAdapter(
+            sportList = sportList,
+            onPlayClick = { sport ->
+                setCurrentSport(sport.name)
+            },
+            onFavoriteClick = { sport ->
+                toggleFavorite(sport)
             }
-        }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
+        )
+
+        binding.homeRVSportList.adapter = homeAdapter
+        binding.homeRVSportList.layoutManager = LinearLayoutManager(requireContext())
+    }
+
+
+
+
+    private fun loadUserData() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val userName = snapshot.child(constants.DB.nameRef).getValue(String::class.java)
+                val caloriesToday = snapshot.child(constants.DB.caloriesPerDayRef).child(today).getValue(Int::class.java) ?: 0
+                val favoriteNames = snapshot.child(constants.DB.favoriteSportsRef)
+                    .getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+                val currentSport = snapshot.child(constants.DB.currentSportRef).getValue(String::class.java)
+
+                binding.homeETUserName.text = userName
+                binding.homeLBLCaloriesValue.text = caloriesToday.toString()
+
+                sportList = getLocalSports().map { sport ->
+                    sport.copy(
+                        isFavorite = sport.name in favoriteNames,
+                        isInCurrent = currentSport != null && sport.name == currentSport
+                    )
+                }
+
+                homeAdapter.updateList(sportList)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(requireContext(), "Failed to load user data", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun toggleFavorite(sport: Sport) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val favRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+            .child(constants.DB.favoriteSportsRef)
+
+        favRef.get().addOnSuccessListener { snapshot ->
+            val currentFavorites = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+
+            val updatedFavorites = if (!sport.isFavorite) {
+                (currentFavorites + sport.name).distinct()
+            } else {
+                currentFavorites - sport.name
+            }
+
+            favRef.setValue(updatedFavorites).addOnSuccessListener {
+                sportList = sportList.map {
+                    if (it.name == sport.name) it.copy(isFavorite = !sport.isFavorite) else it
+                }
+                homeAdapter.updateList(sportList)
+            }
         }
     }
 
-    private fun getTodayDate(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return sdf.format(Date())
+    private fun setCurrentSport(sportName: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance()
+            .getReference(constants.DB.usersRef)
+            .child(uid)
+
+        userRef.child(constants.DB.currentSportRef).setValue(sportName)
+            .addOnSuccessListener {
+                sportList = sportList.map {
+                    it.copy(isInCurrent = it.name == sportName)
+                }
+                homeAdapter.updateList(sportList)
+                Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to set current sport", Toast.LENGTH_SHORT).show()
+            }
     }
+
+
+
+    private fun getLocalSports(): List<Sport> {
+        return listOf(
+            Sport("Jumping Jacks", 30, 200, R.drawable.jump_jacks),
+            Sport("Push Ups", 20, 150, R.drawable.push_ups),
+            Sport("Plank", 10, 90, R.drawable.plank),
+            Sport("Squats", 25, 180, R.drawable.squats),
+            Sport("Lunges", 20, 160, R.drawable.lunges),
+            Sport("Mountain Climbers", 15, 190, R.drawable.mountain_climbers),
+            Sport("Burpees", 20, 220, R.drawable.burpees),
+            Sport("Yoga", 40, 140, R.drawable.yoga),
+            Sport("Shadow Boxing", 25, 210, R.drawable.shadow_boxing),
+            Sport("Skipping Rope", 30, 300, R.drawable.skipping_rope),
+            Sport("Wall Sit", 10, 80, R.drawable.wall_sit),
+            Sport("Sit Ups", 20, 130, R.drawable.sit_ups),
+            Sport("Running", 20, 200, R.drawable.running)
+        )
+    }
+
+
 
     @SuppressLint("DefaultLocale")
     private fun calculateAndShowBMI() {
@@ -120,60 +219,6 @@ private var _binding: FragmentHomeBinding? = null
         binding.homeLBLBMIValue.text = category
     }
 
-    private fun setupRecyclerView() {
-        val sports = listOf(
-            Sport("Jumping Jacks", 30, 200, R.drawable.jump_jacks),
-            Sport("Push Ups", 20, 150, R.drawable.push_ups),
-            Sport("Plank", 10, 90, R.drawable.plank),
-            Sport("Squats", 25, 180, R.drawable.squats),
-            Sport("Lunges", 20, 160, R.drawable.lunges),
-            Sport("Mountain Climbers", 15, 190, R.drawable.mountain_climbers),
-            Sport("Burpees", 20, 220, R.drawable.burpees),
-            Sport("Yoga", 40, 140, R.drawable.yoga),
-            Sport("Shadow Boxing", 25, 210, R.drawable.shadow_boxing),
-            Sport("Skipping Rope", 30, 300, R.drawable.skipping_rope),
-            Sport("Wall Sit", 10, 80, R.drawable.wall_sit),
-            Sport("Sit Ups", 20, 130, R.drawable.sit_ups),
-            Sport("Running", 20, 200, R.drawable.running)
-        )
-
-        homeAdapter = HomeAdapter(
-            sportList = sports,
-            onPlayClick = { selectedSport ->
-                val updatedList = sports.map {
-                    it.copy(isInCurrent = it.name == selectedSport.name)
-                }
-                homeAdapter.updateList(updatedList)
-            },
-            onFavoriteClick = { sport ->
-                saveFavoriteSportToFirebase(sport)
-                Toast.makeText(requireContext(), "${sport.name} favorited: ${sport.isFavorite}", Toast.LENGTH_SHORT).show()
-            }
-        )
-
-        binding.homeRVSportList.adapter = homeAdapter
-        binding.homeRVSportList.layoutManager = LinearLayoutManager(requireContext())
-    }
-
-    private fun saveFavoriteSportToFirebase(sport: Sport) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val favRef = FirebaseDatabase.getInstance()
-            .getReference("users")
-            .child(uid)
-            .child("favoriteSports")
-
-        favRef.get().addOnSuccessListener { snapshot ->
-            val currentFavorites = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
-
-            val updatedFavorites = if (sport.isFavorite) {
-                currentFavorites + sport.name
-            } else {
-                currentFavorites - sport.name
-            }
-
-            favRef.setValue(updatedFavorites.distinct())
-        }
-    }
 
 override fun onDestroyView() {
         super.onDestroyView()

@@ -46,4 +46,6 @@
     <string name="tkcal">\tkcal</string>
     <string name="duration_t">Duration:\t</string>
     <string name="error_height_or_weight_is_invalid_option">Error height or weight is invalid option</string>
+    <string name="favorite_sports">⭐ Favorite Sports</string>
+    <string name="no_favorite_sports_yet_ngo_explore_and_add_some">No favorite sports yet.\nGo explore and add some!</string>
 </resources>

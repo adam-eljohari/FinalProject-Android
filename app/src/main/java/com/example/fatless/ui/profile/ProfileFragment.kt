@@ -74,7 +74,7 @@ class ProfileFragment : Fragment() {
 
         val updatedData = mapOf(constants.DB.nameRef to name, constants.DB.ageRef to age)
 
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
+        val userRef = FirebaseDatabase.getInstance().getReference(constants.DB.usersRef).child(uid)
 
         userRef.updateChildren(updatedData)
             .addOnSuccessListener {
@@ -90,7 +90,7 @@ class ProfileFragment : Fragment() {
     private fun currentUserProfile() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("users").child(uid!!)
+        val userRef = database.getReference(constants.DB.usersRef).child(uid!!)
 
         userRef.get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
