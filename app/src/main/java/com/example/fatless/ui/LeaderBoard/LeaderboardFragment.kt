@@ -32,10 +32,14 @@ class LeaderboardFragment: Fragment() {
 
         _binding = FragmentLeaderboardBinding.inflate(inflater, container, false)
 
-        setupRecyclerView()
-        loadLeaderboardFromRealtimeDB()
+
 
         return binding.root
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+        loadLeaderboardFromRealtimeDB()
     }
 
     private fun loadLeaderboardFromRealtimeDB() {
@@ -48,8 +52,8 @@ class LeaderboardFragment: Fragment() {
                 userList.clear()
 
                 for (userSnapshot in snapshot.children) {
-                    val name = userSnapshot.child("name").getValue(String::class.java) ?: continue
-                    val age = userSnapshot.child("age").getValue(Int::class.java) ?: continue
+                    val name = userSnapshot.child(constants.DB.nameRef).getValue(String::class.java) ?: continue
+                    val age = userSnapshot.child(constants.DB.ageRef).getValue(Int::class.java) ?: continue
 
                     //  Get today's calories only
                     val calories = userSnapshot.child(constants.DB.caloriesPerDayRef).child(todayDate).getValue(Int::class.java) ?: 0

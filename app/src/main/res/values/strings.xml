@@ -26,4 +26,24 @@
     <string name="_999">999</string>
     <string name="_1">1</string>
     <string name="top_10_calories_burned">🏆 Daily Top 10\n Calories Burned</string>
+    <string name="_0">0</string>
+    <string name="calories_burned_today">Calories Burned Today:</string>
+    <string name="status">-</string>
+    <string name="your_bmi">Your BMI:</string>
+    <string name="welcome">Welcome,</string>
+    <string name="user">User</string>
+    <string name="suggested_activities">Suggested Activities</string>
+    <string name="kcal">\tkcal</string>
+    <string name="bmi_calculator">BMI Calculator</string>
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="height_cm">Height (cm)</string>
+    <string name="calculate_bmi">Calculate BMI</string>
+    <string name="sport_name">Sport Name</string>
+    <string name="min">\tmin</string>
+    <string name="_30">30</string>
+    <string name="burns">Burns:\t</string>
+    <string name="_200">200</string>
+    <string name="tkcal">\tkcal</string>
+    <string name="duration_t">Duration:\t</string>
+    <string name="error_height_or_weight_is_invalid_option">Error height or weight is invalid option</string>
 </resources>
