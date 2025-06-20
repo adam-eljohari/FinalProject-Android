@@ -19,4 +19,11 @@
     <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="sign_out">Sign Out</string>
+    <string name="calories">Calories:</string>
+    <string name="username">UserName</string>
+    <string name="age_leaderbord">Age: </string>
+    <string name="_99">99</string>
+    <string name="_999">999</string>
+    <string name="_1">1</string>
+    <string name="top_10_calories_burned">🏆 Daily Top 10\n Calories Burned</string>
 </resources>

@@ -14,6 +14,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class CreateProfileActivity : AppCompatActivity() {
@@ -75,11 +78,14 @@ class CreateProfileActivity : AppCompatActivity() {
         val database = FirebaseDatabase.getInstance()
         val userRef = database.getReference("users")
 
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val dailyCaloriesMap = mapOf(todayDate to 0)
+
         val userData = mapOf(
             constants.DB.nameRef to name,
             constants.DB.ageRef to age,
             constants.DB.profileCompleteRef to true,
-            constants.DB.caloriesBurnedRef to 0,
+            constants.DB.caloriesPerDayRef to dailyCaloriesMap,
             constants.DB.favoriteWorkoutsRef to emptyList<String>()
         )
 
