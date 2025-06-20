@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.fatless.LoginActivity
 import com.example.fatless.databinding.FragmentProfileBinding
+import com.example.fatless.utilities.constants
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -71,7 +72,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val updatedData = mapOf("name" to name, "age" to age)
+        val updatedData = mapOf(constants.DB.nameRef to name, constants.DB.ageRef to age)
 
         val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
 
@@ -93,8 +94,8 @@ class ProfileFragment : Fragment() {
 
         userRef.get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                val name = snapshot.child("name").value.toString()
-                val age = snapshot.child("age").value.toString()
+                val name = snapshot.child(constants.DB.nameRef).value.toString()
+                val age = snapshot.child(constants.DB.ageRef).value.toString()
 
                 binding.profileEDITName.setText(name)
                 binding.profileEDITAge.setText(age)

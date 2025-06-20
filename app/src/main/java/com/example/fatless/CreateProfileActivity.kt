@@ -76,11 +76,11 @@ class CreateProfileActivity : AppCompatActivity() {
         val userRef = database.getReference("users")
 
         val userData = mapOf(
-            "name" to name,
-            "age" to age,
-            "profile_complete" to true,
-            "calories_burned" to 0,
-            "favorite_workouts" to emptyList<String>()
+            constants.DB.nameRef to name,
+            constants.DB.ageRef to age,
+            constants.DB.profileCompleteRef to true,
+            constants.DB.caloriesBurnedRef to 0,
+            constants.DB.favoriteWorkoutsRef to emptyList<String>()
         )
 
         if (uid != null) {
