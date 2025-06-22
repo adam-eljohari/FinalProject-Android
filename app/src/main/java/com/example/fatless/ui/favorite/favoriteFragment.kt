@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fatless.R
 import com.example.fatless.adapter.HomeAdapter
 import com.example.fatless.data.Sport
+import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentFavoriteBinding
 import com.example.fatless.utilities.constants
 import com.google.firebase.auth.FirebaseAuth
@@ -72,7 +72,7 @@ class favoriteFragment : Fragment() {
                 val currentSport = snapshot.child(constants.DB.currentSportRef)
                     .getValue(String::class.java)
 
-                val allSports = getLocalSports()
+                val allSports = SportData.getLocalSports()
 
                 favoriteSports = allSports.filter { it.name in favoriteNames }.map { sport ->
                     sport.copy(
@@ -132,25 +132,6 @@ class favoriteFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to set current sport", Toast.LENGTH_SHORT).show()
             }
     }
-
-    private fun getLocalSports(): List<Sport> {
-        return listOf(
-            Sport("Jumping Jacks", 30, 200, R.drawable.jump_jacks),
-            Sport("Push Ups", 20, 150, R.drawable.push_ups),
-            Sport("Plank", 10, 90, R.drawable.plank),
-            Sport("Squats", 25, 180, R.drawable.squats),
-            Sport("Lunges", 20, 160, R.drawable.lunges),
-            Sport("Mountain Climbers", 15, 190, R.drawable.mountain_climbers),
-            Sport("Burpees", 20, 220, R.drawable.burpees),
-            Sport("Yoga", 40, 140, R.drawable.yoga),
-            Sport("Shadow Boxing", 25, 210, R.drawable.shadow_boxing),
-            Sport("Skipping Rope", 30, 300, R.drawable.skipping_rope),
-            Sport("Wall Sit", 10, 80, R.drawable.wall_sit),
-            Sport("Sit Ups", 20, 130, R.drawable.sit_ups),
-            Sport("Running", 20, 200, R.drawable.running)
-        )
-    }
-
 
 
     override fun onDestroyView() {
