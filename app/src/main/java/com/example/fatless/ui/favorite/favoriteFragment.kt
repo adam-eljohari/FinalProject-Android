@@ -12,12 +12,19 @@ import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentFavoriteBinding
 import com.example.fatless.utilities.constants
+import com.example.fatless.utilities.constants.DB.burnedCaloriesRef
+import com.example.fatless.utilities.constants.DB.currentSportRef
+import com.example.fatless.utilities.constants.DB.nameRef
+import com.example.fatless.utilities.constants.DB.sessionProgressRef
+import com.example.fatless.utilities.constants.DB.timeLeftInMillisRef
+import com.example.fatless.utilities.constants.DB.usersRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
+
 
 class favoriteFragment : Fragment() {
 
@@ -58,10 +65,11 @@ class favoriteFragment : Fragment() {
     }
 
 
+
     private fun loadFavoriteSports() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
+            .getReference(usersRef)
             .child(uid)
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -69,7 +77,7 @@ class favoriteFragment : Fragment() {
                 val favoriteNames = snapshot.child(constants.DB.favoriteSportsRef)
                     .getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
 
-                val currentSport = snapshot.child(constants.DB.currentSportRef)
+                val currentSport = snapshot.child(currentSportRef)
                     .getValue(String::class.java)
 
                 val allSports = SportData.getLocalSports()
@@ -96,7 +104,7 @@ class favoriteFragment : Fragment() {
     private fun updateFavoriteInFirebase(sport: Sport) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val favRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
+            .getReference(usersRef)
             .child(uid)
             .child(constants.DB.favoriteSportsRef)
 
@@ -120,10 +128,10 @@ class favoriteFragment : Fragment() {
     private fun setCurrentSport(sportName: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
+            .getReference(usersRef)
             .child(uid)
 
-        userRef.child(constants.DB.currentSportRef).setValue(sportName)
+        userRef.child(currentSportRef).setValue(sportName)
             .addOnSuccessListener {
                 Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT).show()
                 loadFavoriteSports()
@@ -132,6 +140,8 @@ class favoriteFragment : Fragment() {
                 Toast.makeText(requireContext(), "Failed to set current sport", Toast.LENGTH_SHORT).show()
             }
     }
+
+
 
 
     override fun onDestroyView() {

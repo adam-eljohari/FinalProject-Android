@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fatless.R
 import com.example.fatless.adapter.HomeAdapter
 import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
