@@ -12,11 +12,7 @@ import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentFavoriteBinding
 import com.example.fatless.utilities.constants
-import com.example.fatless.utilities.constants.DB.burnedCaloriesRef
 import com.example.fatless.utilities.constants.DB.currentSportRef
-import com.example.fatless.utilities.constants.DB.nameRef
-import com.example.fatless.utilities.constants.DB.sessionProgressRef
-import com.example.fatless.utilities.constants.DB.timeLeftInMillisRef
 import com.example.fatless.utilities.constants.DB.usersRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
