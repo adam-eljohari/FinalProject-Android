@@ -1,8 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/white"
+    android:padding="16dp">
 
 
+    <!-- Sport Title Centered -->
+    <TextView
+        android:id="@+id/current_LBL_SportName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="45dp"
+        android:text="@string/sport_name"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Circle Progress Spinner -->
+    <FrameLayout
+        android:id="@+id/timerContainer"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        app:layout_constraintTop_toBottomOf="@id/current_LBL_SportName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
+
+
+
+        <TextView
+            android:id="@+id/current_LBL_Timer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/_00_00"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium" />
+    </FrameLayout>
+
+    <!-- Calories Label -->
+    <TextView
+        android:id="@+id/tvCaloriesLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/calories_burned"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        app:layout_constraintTop_toBottomOf="@id/timerContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <!-- ProgressBar Horizontal -->
+    <ProgressBar
+        android:id="@+id/current_PB_progressCalories"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="12dp"
+        android:max="100"
+        android:progress="0"
+        android:progressTint="@color/purple"
+        android:backgroundTint="@color/light_gray"
+        app:layout_constraintTop_toBottomOf="@id/tvCaloriesLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp" />
+
+    <!-- Calories Count Split -->
+    <LinearLayout
+        android:id="@+id/caloriesCountRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/current_PB_progressCalories"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="6dp">
+
+        <TextView
+            android:id="@+id/current_LBL_CaloriesValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_0"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCaloriesUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kcal"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:layout_marginStart="2dp" />
+    </LinearLayout>
+
+    <!-- Buttons Row -->
+    <LinearLayout
+        android:id="@+id/sessionControls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/caloriesCountRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
+
+        <ImageView
+            android:id="@+id/current_BTN_Start"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/green"
+            android:src="@drawable/play_arrow"
+            android:layout_marginEnd="12dp" />
+
+        <ImageView
+            android:id="@+id/current_BTN_Pause"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/orange"
+            android:src="@drawable/pause_arrow"
+            android:layout_marginEnd="12dp" />
+
+        <ImageView
+            android:id="@+id/current_BTN_Delete"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/red"
+            android:src="@drawable/delete_arrow"
+             />
+    </LinearLayout>
+
+    <!-- Bottom Image -->
+    <ImageView
+        android:id="@+id/current_img_SessionArt"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toBottomOf="@id/sessionControls"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="32dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

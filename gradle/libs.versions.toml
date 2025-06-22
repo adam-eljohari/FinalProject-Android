@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.0"
+circularprogressbar = "3.1.0"
 facebookAndroidSdk = "8.x"
 firebaseBom = "33.15.0"
 firebaseUiAuth = "9.0.0"
@@ -20,6 +21,7 @@ activity = "1.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+circularprogressbar = { module = "com.mikhaellopez:circularprogressbar", version.ref = "circularprogressbar" }
 facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

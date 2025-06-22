@@ -9,6 +9,9 @@ class constants{
         const val caloriesPerDayRef = "calories_Per_Day"
         const val favoriteSportsRef = "favorite_sports"
         const val currentSportRef = "current_Sport"
+        const val sessionProgressRef = "session_progress"
+        const val timeLeftInMillisRef = "timeLeftInMillis"
+        const val burnedCaloriesRef = "burnedCalories"
         const val minRef = "min"
         const val kcalRef = "kcal"
     }

@@ -12,8 +12,16 @@ import com.example.fatless.R
 import com.example.fatless.data.User
 import androidx.core.graphics.toColorInt
 
-class LeaderboardAdapter (private val context: Context, private val userList: List<User>)
+class LeaderboardAdapter (private val context: Context)
     : RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder>() {
+
+    private var userList: List<User> = emptyList()
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun submitList(newList: List<User>) {
+        userList = newList
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LeaderboardViewHolder {
         val view = LayoutInflater.from(parent.context)

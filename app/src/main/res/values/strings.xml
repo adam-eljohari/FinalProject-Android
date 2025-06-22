@@ -48,4 +48,6 @@
     <string name="error_height_or_weight_is_invalid_option">Error height or weight is invalid option</string>
     <string name="favorite_sports">⭐ Favorite Sports</string>
     <string name="no_favorite_sports_yet_ngo_explore_and_add_some">No favorite sports yet.\nGo explore and add some!</string>
+    <string name="_00_00">00:00</string>
+    <string name="calories_burned">Calories burned</string>
 </resources>
