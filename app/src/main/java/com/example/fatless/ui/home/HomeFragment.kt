@@ -12,7 +12,12 @@ import com.example.fatless.adapter.HomeAdapter
 import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentHomeBinding
+import com.example.fatless.ui.currentSession.currentSessionFragment
 import com.example.fatless.utilities.constants
+import com.example.fatless.utilities.constants.DB.currentSportRef
+import com.example.fatless.utilities.constants.DB.isThereIsSportInCurrentRef
+import com.example.fatless.utilities.constants.DB.sessionProgressRef
+import com.example.fatless.utilities.constants.DB.usersRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -29,6 +34,8 @@ private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var homeAdapter: HomeAdapter
+    private lateinit var currentsessionFragment: currentSessionFragment
+
     private var sportList = listOf<Sport>()
 
 
@@ -69,9 +76,7 @@ private var _binding: FragmentHomeBinding? = null
 
     private fun loadUserData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
-            .child(uid)
+        val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
 
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
@@ -82,7 +87,7 @@ private var _binding: FragmentHomeBinding? = null
                 val caloriesToday = snapshot.child(constants.DB.caloriesPerDayRef).child(today).getValue(Int::class.java) ?: 0
                 val favoriteNames = snapshot.child(constants.DB.favoriteSportsRef)
                     .getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
-                val currentSport = snapshot.child(constants.DB.currentSportRef).getValue(String::class.java)
+                val currentSport = snapshot.child(sessionProgressRef).child(currentSportRef).getValue(String::class.java)
 
                 binding.homeETUserName.text = userName
                 binding.homeLBLCaloriesValue.text = caloriesToday.toString()
@@ -106,7 +111,7 @@ private var _binding: FragmentHomeBinding? = null
     private fun toggleFavorite(sport: Sport) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val favRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
+            .getReference(usersRef)
             .child(uid)
             .child(constants.DB.favoriteSportsRef)
 
@@ -129,12 +134,73 @@ private var _binding: FragmentHomeBinding? = null
     }
 
     private fun setCurrentSport(sportName: String) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance()
-            .getReference(constants.DB.usersRef)
-            .child(uid)
 
-        userRef.child(constants.DB.currentSportRef).setValue(sportName)
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
+
+
+        userRef.child(sessionProgressRef).get().addOnSuccessListener { snap ->
+
+            val isCurrentSport =
+                snap.child((sessionProgressRef)).child(isThereIsSportInCurrentRef)
+                    .getValue(Boolean::class.java)
+            val curSportName = snap.child((sessionProgressRef)).child(currentSportRef)
+                .getValue(String::class.java)
+
+            if (isCurrentSport != null && isCurrentSport && curSportName != sportName) {
+                currentsessionFragment.finishSession()
+            }
+            val sport = SportData.getLocalSports().find { it.name == sportName }
+            if(curSportName != sportName && sport != null){
+
+                val timeLeftInMillis = (sport.duration * 60 * 1000).toLong()
+
+                val sessionData = mapOf(
+                    isThereIsSportInCurrentRef to false,
+                    currentSportRef to sportName,
+                    constants.DB.timeLeftInMillisRef to timeLeftInMillis,
+                    constants.DB.burnedCaloriesRef to 0
+                )
+
+                userRef.child(sessionProgressRef).setValue(sessionData)
+                    .addOnSuccessListener {
+
+                        Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT)
+                            .show()
+                        loadUserData()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to set current sport",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }
+        }
+
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isCurrentSport = snapshot.child((sessionProgressRef)).child(isThereIsSportInCurrentRef).getValue(Boolean::class.java)
+
+                if(isCurrentSport != null && isCurrentSport){
+                    currentsessionFragment.finishSession()
+                }
+
+            }
+            override fun onCancelled(error: DatabaseError) {
+            }
+        })
+
+        val sessionData = mapOf(
+            isThereIsSportInCurrentRef to false,
+            currentSportRef to sportName ,
+            constants.DB.timeLeftInMillisRef to 0,
+            constants.DB.burnedCaloriesRef to 0
+        )
+
+        userRef.child(sessionProgressRef).setValue(sessionData)
             .addOnSuccessListener {
                 sportList = sportList.map {
                     it.copy(isInCurrent = it.name == sportName)

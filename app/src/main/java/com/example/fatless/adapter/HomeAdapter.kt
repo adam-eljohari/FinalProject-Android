@@ -14,8 +14,7 @@ import com.example.fatless.utilities.constants
 class HomeAdapter (
     private var sportList: List<Sport>,
     private val onPlayClick: (Sport) -> Unit,
-    private val onFavoriteClick: (Sport) -> Unit
-) : RecyclerView.Adapter<HomeAdapter.HomeViewHolder>() {
+    private val onFavoriteClick: (Sport) -> Unit) : RecyclerView.Adapter<HomeAdapter.HomeViewHolder>() {
 
     inner class HomeViewHolder(val binding: ItemSportBinding) :
         RecyclerView.ViewHolder(binding.root)

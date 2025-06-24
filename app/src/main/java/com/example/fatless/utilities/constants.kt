@@ -12,6 +12,7 @@ class constants{
         const val sessionProgressRef = "session_progress"
         const val timeLeftInMillisRef = "timeLeftInMillis"
         const val burnedCaloriesRef = "burnedCalories"
+        const val isThereIsSportInCurrentRef = "is_there_is_sport_in_current"
         const val minRef = "min"
         const val kcalRef = "kcal"
     }

@@ -10,10 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fatless.adapter.LeaderboardAdapter
 import com.example.fatless.data.User
 import com.example.fatless.databinding.FragmentLeaderboardBinding
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
+import com.example.fatless.utilities.constants
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,7 +30,6 @@ class LeaderboardFragment: Fragment() {
 
         _binding = FragmentLeaderboardBinding.inflate(inflater, container, false)
 
-
         return binding.root
     }
 
@@ -47,27 +44,19 @@ class LeaderboardFragment: Fragment() {
         private fun loadLeaderboardData() {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        db.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                userList.clear()
 
-                for (userSnap in snapshot.children) {
-                    val name = userSnap.child("name").getValue(String::class.java) ?: continue
-                    val age = userSnap.child("age").getValue(Int::class.java) ?: continue
-                    val calories = userSnap.child("calories_Per_Day").child(today).getValue(Int::class.java) ?: 0
-
-                    userList.add(User(name, age, calories))
-                }
-
-                // Sort by calories descending, take top 10
-                val top10 = userList.sortedByDescending { it.caloriesBurned }.take(10)
-                adapter.submitList(top10)
+        db.child(constants.DB.usersRef).get().addOnSuccessListener { snap ->
+            for (userSnap in snap.children) {
+                val name = userSnap.child(constants.DB.nameRef).getValue(String::class.java) ?: continue
+                val age = userSnap.child(constants.DB.ageRef).getValue(Int::class.java) ?: continue
+                val calories = userSnap.child(constants.DB.caloriesPerDayRef).child(today).getValue(Int::class.java) ?: 0
+                userList.add(User(name, age, calories))
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(requireContext(), "Failed to load leaderboard", Toast.LENGTH_SHORT).show()
-            }
-        })
+            val top10 = userList.sortedByDescending { it.caloriesBurned }.take(10)
+            adapter.submitList(top10)
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Failed to load leaderboard", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {

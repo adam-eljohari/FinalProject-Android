@@ -11,8 +11,11 @@ import com.example.fatless.adapter.HomeAdapter
 import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentFavoriteBinding
+import com.example.fatless.ui.currentSession.currentSessionFragment
 import com.example.fatless.utilities.constants
 import com.example.fatless.utilities.constants.DB.currentSportRef
+import com.example.fatless.utilities.constants.DB.isThereIsSportInCurrentRef
+import com.example.fatless.utilities.constants.DB.sessionProgressRef
 import com.example.fatless.utilities.constants.DB.usersRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -28,6 +31,7 @@ class favoriteFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var homeAdapter: HomeAdapter
+    private lateinit var currentsessionFragment: currentSessionFragment
     private var favoriteSports = listOf<Sport>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -64,16 +68,14 @@ class favoriteFragment : Fragment() {
 
     private fun loadFavoriteSports() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance()
-            .getReference(usersRef)
-            .child(uid)
+        val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val favoriteNames = snapshot.child(constants.DB.favoriteSportsRef)
                     .getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
 
-                val currentSport = snapshot.child(currentSportRef)
+                val currentSport = snapshot.child(sessionProgressRef).child(currentSportRef)
                     .getValue(String::class.java)
 
                 val allSports = SportData.getLocalSports()
@@ -122,19 +124,51 @@ class favoriteFragment : Fragment() {
     }
 
     private fun setCurrentSport(sportName: String) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance()
-            .getReference(usersRef)
-            .child(uid)
 
-        userRef.child(currentSportRef).setValue(sportName)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT).show()
-                loadFavoriteSports()
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
+
+
+        userRef.child(sessionProgressRef).get().addOnSuccessListener { snap ->
+            val isCurrentSport =
+                snap.child((sessionProgressRef)).child(isThereIsSportInCurrentRef)
+                    .getValue(Boolean::class.java)
+            val curSportName = snap.child((sessionProgressRef)).child(currentSportRef)
+                .getValue(String::class.java)
+
+            if (isCurrentSport != null && isCurrentSport && curSportName != sportName) {
+                currentsessionFragment.finishSession()
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to set current sport", Toast.LENGTH_SHORT).show()
+            val sport = SportData.getLocalSports().find { it.name == sportName }
+            if(curSportName != sportName && sport != null){
+
+                val timeLeftInMillis = (sport.duration * 60 * 1000).toLong()
+
+                val sessionData = mapOf(
+                    isThereIsSportInCurrentRef to false,
+                    currentSportRef to sportName,
+                    constants.DB.timeLeftInMillisRef to timeLeftInMillis,
+                    constants.DB.burnedCaloriesRef to 0
+                )
+
+                userRef.child(sessionProgressRef).setValue(sessionData)
+                    .addOnSuccessListener {
+
+                        Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT)
+                            .show()
+                        loadFavoriteSports()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to set current sport",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             }
+        }
+
+
     }
 
 

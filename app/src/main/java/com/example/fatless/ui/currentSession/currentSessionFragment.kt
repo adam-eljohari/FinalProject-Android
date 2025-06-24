@@ -1,5 +1,6 @@
 package com.example.fatless.ui.currentSession
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
@@ -8,10 +9,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.fatless.R
-import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentCurrentsessionBinding
 import com.example.fatless.utilities.constants
+import com.example.fatless.utilities.constants.DB.currentSportRef
+import com.example.fatless.utilities.constants.DB.isThereIsSportInCurrentRef
+import com.example.fatless.utilities.constants.DB.sessionProgressRef
+import com.example.fatless.utilities.constants.DB.timeLeftInMillisRef
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -35,13 +39,10 @@ class currentSessionFragment : Fragment()  {
     private var caloriesPerSecond: Float = 0f
     private var totalCalories: Int = 0
 
-    private lateinit var currentSport: Sport
-    private var totalTimeInMillis: Long = 0L
+    private lateinit var currentSportNa: String
     private var timeLeftInMillis: Long = 0L
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentCurrentsessionBinding.inflate(inflater, container, false)
 
         loadCurrentSportData()
@@ -64,62 +65,53 @@ class currentSessionFragment : Fragment()  {
         return binding.root
     }
 
+
     private fun loadCurrentSportData() {
         if (uid == null) return
 
-        db.child(constants.DB.usersRef).child(uid).child(constants.DB.currentSportRef)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val sportName = snapshot.getValue(String::class.java)
-
-                    if (sportName.isNullOrEmpty()) {
-                        showNoSession()
-                        return
-                    }
-
+        db.child(constants.DB.usersRef).child(uid).child(sessionProgressRef)
+            .get().addOnSuccessListener { snap ->
+                val sportName = snap.child(currentSportRef).getValue(String::class.java)
+                if (sportName.isNullOrEmpty()) {
+                    showNoSession()
+                }
+                else{
                     val sport = SportData.getLocalSports().find { it.name == sportName }
-
                     if (sport != null) {
 
-
-                        currentSport = sport
-                        totalTimeInMillis = (sport.duration * 60 * 1000).toLong()
-                        timeLeftInMillis = totalTimeInMillis
-
-
+//                        totalTimeInMillis = (sport.duration * 60 * 1000).toLong()
+//                        timeLeftInMillis = totalTimeInMillis //***
+                        currentSportNa = sportName
 
                         binding.currentLBLSportName.text = sport.name
 
                         totalDurationSeconds = sport.duration * 60
                         totalCalories = sport.calories
-                        caloriesPerSecond = sport.calories.toFloat() / totalDurationSeconds
+                        caloriesPerSecond = sport.calories.toFloat() / totalDurationSeconds//***
 
-                        db.child(constants.DB.usersRef).child(uid).child(constants.DB.sessionProgressRef).get()
-                            .addOnSuccessListener { snap ->
-                                timeLeftInMillis =
-                                    snap.child(constants.DB.timeLeftInMillisRef).getValue(Long::class.java)
-                                        ?: (totalDurationSeconds * 1000L)
 
-                                val savedCalories = snap.child(constants.DB.burnedCaloriesRef).getValue(Int::class.java) ?: 0
+                        timeLeftInMillis = snap.child(timeLeftInMillisRef).getValue(Long::class.java) ?: (totalDurationSeconds * 1000L)
 
-                                updateTimerUI()
-                                binding.currentLBLCaloriesValue.text = sport.calories.toString()
-                                binding.currentPBProgressCalories.max = sport.calories
-                                binding.currentPBProgressCalories.progress = savedCalories
-                                binding.currentImgSessionArt.setImageResource(sport.imageResId)
-                            }
-                    } else {
-                        showNoSession()
+                        val savedCalories = snap.child(constants.DB.burnedCaloriesRef).getValue(Int::class.java) ?: 0
+
+                        updateTimerUI()
+                        binding.currentLBLCaloriesValue.text = sport.calories.toString()
+                        binding.currentPBProgressCalories.max = sport.calories
+                        binding.currentPBProgressCalories.progress = savedCalories
+                        binding.currentImgSessionArt.setImageResource(sport.imageResId)
+
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    showNoSession()
-                }
-            })
-    }
+            }
+   }
 
     private fun startTimer() {
+        if (uid == null) return
+
+        db.child(constants.DB.usersRef).child(uid).child(sessionProgressRef).child(isThereIsSportInCurrentRef).setValue(true)
+
+
         countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
@@ -146,16 +138,19 @@ class currentSessionFragment : Fragment()  {
         binding.currentPBProgressCalories.progress = burnedCalories
 
         val sessionData = mapOf(
-            constants.DB.timeLeftInMillisRef to timeLeftInMillis,
+            isThereIsSportInCurrentRef to true,
+            currentSportRef to currentSportNa,
+            timeLeftInMillisRef to timeLeftInMillis,
             constants.DB.burnedCaloriesRef to burnedCalories
         )
 
         uid?.let {
-            db.child(constants.DB.usersRef).child(it).child(constants.DB.sessionProgressRef).setValue(sessionData)
+            db.child(constants.DB.usersRef).child(it).child(sessionProgressRef).setValue(sessionData)
         }
 
     }
 
+    @SuppressLint("DefaultLocale")
     private fun updateTimerUI() {
         val minutes = (timeLeftInMillis / 1000) / 60
         val seconds = (timeLeftInMillis / 1000) % 60
@@ -166,18 +161,23 @@ class currentSessionFragment : Fragment()  {
         binding.currentPBProgressCalories.progress = caloriesProgress
     }
 
-    private fun finishSession() {
+     fun finishSession() {
         pauseTimerAndSave()
         if (uid == null) return
 
         val burnedCalories = binding.currentPBProgressCalories.progress.toString().toIntOrNull() ?: 0
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
+        val sessionData = mapOf(
+            isThereIsSportInCurrentRef to false,
+            timeLeftInMillisRef to 0,
+            constants.DB.burnedCaloriesRef to 0
+        )
+
+
+        db.child(constants.DB.usersRef).child(uid).child(sessionProgressRef).setValue(sessionData)
 
         val userRef = db.child(constants.DB.usersRef).child(uid)
-
-        userRef.child(constants.DB.currentSportRef).removeValue()
-        userRef.child(constants.DB.sessionProgressRef).removeValue()
 
         userRef.child(constants.DB.caloriesPerDayRef).child(today)
             .addListenerForSingleValueEvent(object : ValueEventListener {

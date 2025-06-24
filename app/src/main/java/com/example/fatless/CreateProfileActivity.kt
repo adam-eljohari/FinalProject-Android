@@ -81,15 +81,27 @@ class CreateProfileActivity : AppCompatActivity() {
         val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val dailyCaloriesMap = mapOf(todayDate to 0)
 
+        val sessionData = mapOf(
+            constants.DB.isThereIsSportInCurrentRef to false,
+            constants.DB.currentSportRef to null ,
+            constants.DB.timeLeftInMillisRef to 0,
+            constants.DB.burnedCaloriesRef to 0
+        )
+
         val userData = mapOf(
             constants.DB.nameRef to name,
             constants.DB.ageRef to age,
             constants.DB.profileCompleteRef to true,
             constants.DB.caloriesPerDayRef to dailyCaloriesMap,
-            constants.DB.favoriteSportsRef to emptyList<String>()
+            constants.DB.favoriteSportsRef to emptyList<String>(),
+            constants.DB.sessionProgressRef to sessionData,
         )
 
+
+
+
         if (uid != null) {
+
             userRef.child(uid).setValue(userData)
                 .addOnSuccessListener {
                     Toast.makeText(this, "User profile saved!", Toast.LENGTH_SHORT).show()
