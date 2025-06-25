@@ -11,8 +11,9 @@ import com.example.fatless.adapter.HomeAdapter
 import com.example.fatless.data.Sport
 import com.example.fatless.data.SportData
 import com.example.fatless.databinding.FragmentFavoriteBinding
-import com.example.fatless.ui.currentSession.currentSessionFragment
 import com.example.fatless.utilities.constants
+import com.example.fatless.utilities.constants.DB.burnedCaloriesRef
+import com.example.fatless.utilities.constants.DB.caloriesPerDayRef
 import com.example.fatless.utilities.constants.DB.currentSportRef
 import com.example.fatless.utilities.constants.DB.isThereIsSportInCurrentRef
 import com.example.fatless.utilities.constants.DB.sessionProgressRef
@@ -23,6 +24,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class favoriteFragment : Fragment() {
@@ -31,7 +35,6 @@ class favoriteFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var homeAdapter: HomeAdapter
-    private lateinit var currentsessionFragment: currentSessionFragment
     private var favoriteSports = listOf<Sport>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -89,8 +92,7 @@ class favoriteFragment : Fragment() {
 
                 homeAdapter.updateList(favoriteSports)
 
-                binding.favoriteLBLTitleEmptyFavorites.visibility =
-                    if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
+                binding.favoriteLBLTitleEmptyFavorites.visibility = if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -101,10 +103,7 @@ class favoriteFragment : Fragment() {
 
     private fun updateFavoriteInFirebase(sport: Sport) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val favRef = FirebaseDatabase.getInstance()
-            .getReference(usersRef)
-            .child(uid)
-            .child(constants.DB.favoriteSportsRef)
+        val favRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid).child(constants.DB.favoriteSportsRef)
 
         favRef.get().addOnSuccessListener { snapshot ->
             val currentFavorites = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
@@ -117,10 +116,37 @@ class favoriteFragment : Fragment() {
                 homeAdapter.updateList(favoriteSports)
 
                 // Show empty state if needed
-                binding.favoriteLBLTitleEmptyFavorites.visibility =
-                    if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
+                binding.favoriteLBLTitleEmptyFavorites.visibility = if (favoriteSports.isEmpty()) View.VISIBLE else View.GONE
             }
         }
+    }
+
+    private fun checkCurrentSportAndSave(sportName: String){
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
+
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val sport = SportData.getLocalSports().find { it.name == sportName }
+
+        if (sport != null){
+
+            userRef.get().addOnSuccessListener { snap ->
+                val current = snap.child(caloriesPerDayRef).child(today).getValue(Int::class.java) ?: 0
+                val burnedCalories = snap.child(sessionProgressRef).child(burnedCaloriesRef).getValue(Int::class.java) ?: 0
+                val newTotal = current + burnedCalories
+                userRef.child(caloriesPerDayRef).child(today).setValue(newTotal)
+
+            }
+            val sessionData = mapOf(
+                isThereIsSportInCurrentRef to false,
+                currentSportRef to null,
+                constants.DB.timeLeftInMillisRef to 0,
+                burnedCaloriesRef to 0
+            )
+            userRef.child(sessionProgressRef).setValue(sessionData)
+        }
+
     }
 
     private fun setCurrentSport(sportName: String) {
@@ -128,19 +154,16 @@ class favoriteFragment : Fragment() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseDatabase.getInstance().getReference(usersRef).child(uid)
 
-
         userRef.child(sessionProgressRef).get().addOnSuccessListener { snap ->
-            val isCurrentSport =
-                snap.child((sessionProgressRef)).child(isThereIsSportInCurrentRef)
-                    .getValue(Boolean::class.java)
-            val curSportName = snap.child((sessionProgressRef)).child(currentSportRef)
-                .getValue(String::class.java)
-
-            if (isCurrentSport != null && isCurrentSport && curSportName != sportName) {
-                currentsessionFragment.finishSession()
+            val currentSportName = snap.child(currentSportRef).getValue(String::class.java)
+            val isThereIsCurrentSport = snap.child(isThereIsSportInCurrentRef).getValue(Boolean::class.java)
+            if (currentSportName != null) {
+                if (isThereIsCurrentSport == true && currentSportName != sportName) {
+                    checkCurrentSportAndSave(currentSportName)
+                }
             }
             val sport = SportData.getLocalSports().find { it.name == sportName }
-            if(curSportName != sportName && sport != null){
+            if (isThereIsCurrentSport == false && currentSportName != sportName && sport != null) {
 
                 val timeLeftInMillis = (sport.duration * 60 * 1000).toLong()
 
@@ -148,13 +171,17 @@ class favoriteFragment : Fragment() {
                     isThereIsSportInCurrentRef to false,
                     currentSportRef to sportName,
                     constants.DB.timeLeftInMillisRef to timeLeftInMillis,
-                    constants.DB.burnedCaloriesRef to 0
+                    burnedCaloriesRef to 0
                 )
 
                 userRef.child(sessionProgressRef).setValue(sessionData)
                     .addOnSuccessListener {
 
-                        Toast.makeText(requireContext(), "Now playing: $sportName", Toast.LENGTH_SHORT)
+                        Toast.makeText(
+                            requireContext(),
+                            "Now playing: $sportName",
+                            Toast.LENGTH_SHORT
+                        )
                             .show()
                         loadFavoriteSports()
                     }
@@ -165,10 +192,9 @@ class favoriteFragment : Fragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+
             }
         }
-
-
     }
 
 
