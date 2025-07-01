@@ -30,18 +30,15 @@ class HomeAdapter (
         val sport = sportList[position]
         val b = holder.binding
 
-        // Set texts
         b.sportLBLSportName.text = sport.name
         b.sportLBLTime.text = sport.duration.toString()
         b.tvSportDuration.text = constants.DB.minRef
         b.sportLBLSportCalories.text = sport.calories.toString()
         b.tvSportCalories.text = constants.DB.kcalRef
 
-        // Set image
         b.imgSport.setImageResource(sport.imageResId)
 
 
-        // Favorite button
         val favIcon = if (sport.isFavorite) R.drawable.favorite_bnt_pic else R.drawable.unfavorite_bnt_pic
         b.sportBTNFavorite.setImageResource(favIcon)
 
@@ -49,7 +46,6 @@ class HomeAdapter (
             onFavoriteClick(sport)
         }
 
-        // Background color for current sport
         val cardColor = if (sport.isInCurrent) R.color.progress_yellow else R.color.white
         b.cardSport.setCardBackgroundColor(ContextCompat.getColor(b.root.context, cardColor))
 

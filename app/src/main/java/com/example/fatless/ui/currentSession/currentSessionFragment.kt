@@ -161,7 +161,7 @@ class currentSessionFragment : Fragment()  {
         binding.currentPBProgressCalories.progress = caloriesProgress
     }
 
-     fun finishSession() {
+    private fun finishSession() {
         pauseTimerAndSave()
         if (uid == null) return
 
